@@ -13,6 +13,7 @@ export default function App() {
 
 
   const [newMessageText, setNewMessageText] = useState("");
+  const [sendError, setSendError] = useState<string | null>(null);
 
   useEffect(() => {
     // Make sure scrollTo works on button click in Chrome
@@ -28,6 +29,11 @@ export default function App() {
         <p>
           Connected as <strong>{NAME}</strong>
         </p>
+        {sendError ? (
+          <p className="chat-error" role="alert">
+            {sendError}
+          </p>
+        ) : null}
       </header>
       {messages?.map((message) => (
         <article
@@ -42,10 +48,15 @@ export default function App() {
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-          // Replace "alert("Mutation not implemented yet");" with the following code:
-          await sendMessage({ user: NAME, body: newMessageText });
-          
-          setNewMessageText("");
+          setSendError(null);
+          try {
+            await sendMessage({ user: NAME, body: newMessageText });
+            setNewMessageText("");
+          } catch (err) {
+            const message =
+              err instanceof Error ? err.message : "Could not send message.";
+            setSendError(message);
+          }
         }}
       >
         <input

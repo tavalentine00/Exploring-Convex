@@ -151,6 +151,16 @@ button {
   font-weight: 500;
 }
 
+.chat header .chat-error {
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.35);
+  border-radius: 6px;
+}
+
 .chat header p input {
   font-weight: 500;
   margin: 0;
