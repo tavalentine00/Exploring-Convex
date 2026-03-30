@@ -8,8 +8,11 @@ const NAME = getOrSetFakeName();
 
 export default function App() {
   const sendMessage = useMutation(api.chat.sendMessage);
+  const [nameFilter, setNameFilter] = useState("");
 
-  const messages = useQuery(api.chat.getMessages);
+  const messages = useQuery(api.chat.getMessages, {
+    userFilter: nameFilter.trim() ? nameFilter : undefined,
+  });
 
 
   const [newMessageText, setNewMessageText] = useState("");
@@ -30,17 +33,15 @@ export default function App() {
           <p>
             Connected as <strong>{NAME}</strong>
           </p>
-          <form
-            className="chat-wiki-search"
-            onSubmit={(e) => e.preventDefault()}
-          >
-            <input
-              type="search"
-              placeholder="Search Wikipedia"
-              aria-label="Search Wikipedia"
-              enterKeyHint="search"
-            />
-          </form>
+          <input
+            className="chat-search-input"
+            type="search"
+            value={nameFilter}
+            onChange={(e) => setNameFilter(e.target.value)}
+            placeholder="Filter by exact name"
+            aria-label="Filter messages by user name"
+            enterKeyHint="search"
+          />
         </div>
         {sendError ? (
           <p className="chat-error" role="alert">

@@ -6,5 +6,5 @@ export default defineSchema({
     user: v.string(),
     body: v.string(),
     poop: v.string(),
-  }),
+  }).index("by_user", ["user"]),
 });

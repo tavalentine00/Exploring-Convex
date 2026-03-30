@@ -3,8 +3,18 @@ import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
 
 export const getMessages = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { userFilter: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const filter = args.userFilter?.trim();
+    if (filter) {
+      const byUser = await ctx.db
+        .query("messages")
+        .withIndex("by_user", (q) => q.eq("user", filter))
+        .order("desc")
+        .take(50);
+      return byUser.reverse();
+    }
+
     const messages = await ctx.db.query("messages").order("desc").take(50);
     return messages.reverse();
   },
