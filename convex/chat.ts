@@ -1,32 +1,5 @@
-import { action, mutation, query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-
-/** Parses Wikipedia `action=query&prop=extracts` JSON into plain-text extract, or null if missing. */
-export function getSummaryFromJSON(data: unknown): string | null {
-  if (typeof data !== "object" || data === null) return null;
-  const query = (data as { query?: { pages?: Record<string, { extract?: string }> } }).query;
-  const pages = query?.pages;
-  if (!pages || typeof pages !== "object") return null;
-  const ids = Object.keys(pages);
-  if (ids.length === 0) return null;
-  const extract = pages[ids[0]]?.extract;
-  return typeof extract === "string" && extract.length > 0 ? extract : null;
-}
-
-export const getWikiSummary = action({
-  args: { topic: v.string() },
-  handler: async (_ctx, args) => {
-    const trimmed = args.topic.trim();
-    if (!trimmed) return null;
-    const url =
-      "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&titles=" +
-      encodeURIComponent(trimmed);
-    const response = await fetch(url);
-    if (!response.ok) return null;
-    const json: unknown = await response.json();
-    return getSummaryFromJSON(json);
-  },
-});
 
 export const getMessages = query({
   args: {},
@@ -50,5 +23,18 @@ export const sendMessage = mutation({
       body: args.body,
       poop: args.poop,
     });
+
+    if(args.body.startsWith("/wiki")) {
+      const topic = args.body.slice(args.body.indexOf("") + 1);
+      const response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&prop=extracts&exintro&explaintext&titles=${topic}`);
+      const data = await response.json();
+      const firstPageId = Object.keys(data.query.pages)[0];
+      const summary = data.query.pages[firstPageId].extract;
+      await ctx.db.insert("messages", {
+        user: "Wikipedia",
+        body: summary,
+        poop: "wikipedia",
+      });
+    }
   },
 });
