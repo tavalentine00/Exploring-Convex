@@ -4,7 +4,9 @@ import { v } from "convex/values";
 export const getMessages = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("messages").order("asc").collect();
+    const messages = await ctx.db.query("messages").order("desc").take(50);
+    return messages.reverse();
+    // return await ctx.db.query("messages").order("asc").collect();
   },
 });
 
@@ -12,12 +14,14 @@ export const sendMessage = mutation({
   args: {
     user: v.string(),
     body: v.string(),
+    poop: v.string(),
   },
   handler: async (ctx, args) => {
     console.log("This TypeScript function is running on the server");
     await ctx.db.insert("messages", {
       user: args.user,
       body: args.body,
+      poop: args.poop,
     });
   },
 });

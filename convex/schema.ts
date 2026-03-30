@@ -5,5 +5,6 @@ export default defineSchema({
   messages: defineTable({
     user: v.string(),
     body: v.string(),
+    poop: v.string(),
   }),
 });

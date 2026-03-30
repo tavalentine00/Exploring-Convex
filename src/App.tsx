@@ -9,7 +9,7 @@ const NAME = getOrSetFakeName();
 export default function App() {
   const sendMessage = useMutation(api.chat.sendMessage);
 
-  const messages = useQuery(api.chat.getMessages) ?? [];
+  const messages = useQuery(api.chat.getMessages);
 
 
   const [newMessageText, setNewMessageText] = useState("");
@@ -41,7 +41,7 @@ export default function App() {
           className={message.user === NAME ? "message-mine" : ""}
         >
           <div>{message.user}</div>
-
+          <div>{message.poop}</div>
           <p>{message.body}</p>
         </article>
       ))}
@@ -50,7 +50,7 @@ export default function App() {
           e.preventDefault();
           setSendError(null);
           try {
-            await sendMessage({ user: NAME, body: newMessageText });
+            await sendMessage({ user: NAME, body: newMessageText, poop: faker.animal.dog() });
             setNewMessageText("");
           } catch (err) {
             const message =
