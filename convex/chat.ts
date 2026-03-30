@@ -1,5 +1,32 @@
-import { mutation, query } from "./_generated/server";
+import { action, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+
+/** Parses Wikipedia `action=query&prop=extracts` JSON into plain-text extract, or null if missing. */
+export function getSummaryFromJSON(data: unknown): string | null {
+  if (typeof data !== "object" || data === null) return null;
+  const query = (data as { query?: { pages?: Record<string, { extract?: string }> } }).query;
+  const pages = query?.pages;
+  if (!pages || typeof pages !== "object") return null;
+  const ids = Object.keys(pages);
+  if (ids.length === 0) return null;
+  const extract = pages[ids[0]]?.extract;
+  return typeof extract === "string" && extract.length > 0 ? extract : null;
+}
+
+export const getWikiSummary = action({
+  args: { topic: v.string() },
+  handler: async (_ctx, args) => {
+    const trimmed = args.topic.trim();
+    if (!trimmed) return null;
+    const url =
+      "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&titles=" +
+      encodeURIComponent(trimmed);
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const json: unknown = await response.json();
+    return getSummaryFromJSON(json);
+  },
+});
 
 export const getMessages = query({
   args: {},

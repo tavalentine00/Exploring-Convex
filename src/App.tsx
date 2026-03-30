@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { faker } from "@faker-js/faker";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
 
 // For demo purposes. In a real app, you'd have real user data.
@@ -8,6 +8,7 @@ const NAME = getOrSetFakeName();
 
 export default function App() {
   const sendMessage = useMutation(api.chat.sendMessage);
+  const getWikiSummary = useAction(api.chat.getWikiSummary);
 
   const messages = useQuery(api.chat.getMessages);
 
@@ -50,7 +51,19 @@ export default function App() {
           e.preventDefault();
           setSendError(null);
           try {
-            await sendMessage({ user: NAME, body: newMessageText, poop: faker.animal.dog() });
+            const text = newMessageText;
+            await sendMessage({ user: NAME, body: text, poop: faker.animal.dog() });
+            if (text.startsWith("/wiki")) {
+              const topic = text.slice(text.indexOf(" ") + 1);
+              const summary = await getWikiSummary({ topic });
+              if (summary) {
+                await sendMessage({
+                  user: "Wikipedia",
+                  body: summary,
+                  poop: "🐶",
+                });
+              }
+            }
             setNewMessageText("");
           } catch (err) {
             const message =
