@@ -7,18 +7,12 @@ export const getMessages = query({
   handler: async (ctx, args) => {
     const filter = args.userFilter?.trim();
     if (filter) {
-      const normalizedFilter = filter.toLowerCase();
-      const recent = await ctx.db
+      const results = await ctx.db
         .query("messages")
-        .order("desc")
-        .take(200);
-      return recent
-        .filter((message) =>
-          message.user.toLowerCase().includes(normalizedFilter),
-        )
-        .reverse();
+        .withSearchIndex("search_user", (q) => q.search("user", filter))
+        .take(50);
+      return results.reverse();
     }
-
     const messages = await ctx.db.query("messages").order("desc").take(50);
     return messages.reverse();
   },
