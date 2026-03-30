@@ -26,9 +26,22 @@ export default function App() {
     <main className="chat">
       <header>
         <h1>Convex Chat</h1>
-        <p>
-          Connected as <strong>{NAME}</strong>
-        </p>
+        <div className="chat-identity">
+          <p>
+            Connected as <strong>{NAME}</strong>
+          </p>
+          <form
+            className="chat-wiki-search"
+            onSubmit={(e) => e.preventDefault()}
+          >
+            <input
+              type="search"
+              placeholder="Search Wikipedia"
+              aria-label="Search Wikipedia"
+              enterKeyHint="search"
+            />
+          </form>
+        </div>
         {sendError ? (
           <p className="chat-error" role="alert">
             {sendError}
@@ -46,6 +59,7 @@ export default function App() {
         </article>
       ))}
       <form
+        className="chat-compose"
         onSubmit={async (e) => {
           e.preventDefault();
           setSendError(null);
