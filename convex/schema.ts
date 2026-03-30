@@ -6,5 +6,7 @@ export default defineSchema({
     user: v.string(),
     body: v.string(),
     poop: v.string(),
-  }),
+    
+  }).index("by_user", ["user"])
+  .searchIndex("search_user", { searchField: "user" })
 });

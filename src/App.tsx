@@ -8,8 +8,11 @@ const NAME = getOrSetFakeName();
 
 export default function App() {
   const sendMessage = useMutation(api.chat.sendMessage);
+  const [nameFilter, setNameFilter] = useState("");
 
-  const messages = useQuery(api.chat.getMessages);
+  const messages = useQuery(api.chat.getMessages, {
+    userFilter: nameFilter.trim() ? nameFilter : undefined,
+  });
 
 
   const [newMessageText, setNewMessageText] = useState("");
@@ -26,9 +29,20 @@ export default function App() {
     <main className="chat">
       <header>
         <h1>Convex Chat</h1>
-        <p>
-          Connected as <strong>{NAME}</strong>
-        </p>
+        <div className="chat-identity">
+          <p>
+            Connected as <strong>{NAME}</strong>
+          </p>
+          <input
+            className="chat-search-input"
+            type="search"
+            value={nameFilter}
+            onChange={(e) => setNameFilter(e.target.value)}
+            placeholder="Filter by exact name"
+            aria-label="Filter messages by user name"
+            enterKeyHint="search"
+          />
+        </div>
         {sendError ? (
           <p className="chat-error" role="alert">
             {sendError}
@@ -46,6 +60,7 @@ export default function App() {
         </article>
       ))}
       <form
+        className="chat-compose"
         onSubmit={async (e) => {
           e.preventDefault();
           setSendError(null);
